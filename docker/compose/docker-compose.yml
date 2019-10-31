@@ -1,0 +1,34 @@
+version: '2'
+services:
+  mysql:
+    restart: 'always'
+    image: mysql:5
+    volumes:
+     - "../create_database.sql:/docker-entrypoint-initdb.d/create_database.sql"
+     - "$PWD/ciab/bkp:/tmp"
+     - "$PWD/ciab/data:/var/lib/mysql"
+     - "$PWD/etc/localtime:/etc/localtime"
+    environment:
+     - MYSQL_ROOT_PASSWORD=root
+     - MYSQL_DATABASE=ciab
+     - MYSQL_USER=ciab
+     - MYSQL_PASSWORD=ciab
+    ports:
+     - "3306:3306"
+  python:
+    restart: 'always'
+    build:
+      context: ../dockerfile/python3/
+      dockerfile: Dockerfile
+    image: abraaojs/python36:latest
+    volumes:
+     - "/etc/localtime:/etc/localtime"
+    environment:
+     - MYSQL_USER=root
+     - MYSQL_PASS=root
+     - MYSQL_HOST=mysql
+     - MYSQL_DB=ciab
+    ports:
+     - "8080:8080"
+    depends_on:
+      - mysql
